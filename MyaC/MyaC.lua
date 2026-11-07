@@ -170,6 +170,11 @@ function Tokenizer:Tokenize(State)
 			end
 
 			Tokenizer:NewToken(State)
+		elseif Tokenizer.Character == "=" then
+			Tokenizer.Token = {
+				Kind = "Equal",
+			}
+			Tokenizer:Advance(State)
 		elseif StringHasLetter(BaseIdent, Tokenizer.Character) then
 			local StartIndex = Tokenizer.Index
 
