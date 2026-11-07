@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int Main(int Argc, char **Argv) {
+int Main() {
   printf("Meow\n");
   return 0;
 }

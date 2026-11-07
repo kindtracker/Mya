@@ -4,6 +4,15 @@ local SourceFolders = {
 	"Source",
 }
 
+local IncludeFolders = {}
+
+-- Release will add "-O2", Debug will add CFlag "-O0" and Sanitizer "address,undefined,memory"
+local BuildMode = "Release"
+
+local Sanitizers = "" -- e.g. "address,undefined"
+local CFlags = "-Wall -Wextra"
+local LDFlags = ""
+
 function ListAllFiles(Directory)
 	local Files = {}
 
@@ -29,6 +38,19 @@ function ListAllFiles(Directory)
 	return Files
 end
 
+function Execute(Command)
+	-- print("> " .. Command)
+
+	local Success, Type, Code = os.execute(Command)
+	if not Success then
+		error(string.format("Command failed (exit code: %s): %s", tostring(Code), Command))
+	end
+
+	return Success
+end
+
+CFlags = CFlags .. " -fsanitize=" .. Sanitizers
+LDFlags = LDFlags .. " -fsanitize=" .. Sanitizers
 table.insert(SourceFolders, "Runtime/C")
 
 lfs.mkdir("Build")
@@ -47,13 +69,13 @@ for _, SourceFolder in ipairs(SourceFolders) do
 			os.execute('mkdir -p "' .. Parent .. '"')
 		end
 
-		local Command = string.format('emcc -c -o "%s" "%s"', Object, CFile)
-		os.execute(Command)
+		local Command = string.format("emcc -c -o %q %q %s", Object, CFile, CFlags)
+		Execute(Command)
 	end
 end
 
 local Objects = table.concat(ObjectFiles, " ")
-local Command = string.format("emcc -o Web/C.wasm %s", Objects)
-os.execute(Command)
+local Command = string.format("emcc -o Web/C.js %s %s", Objects, LDFlags)
+Execute(Command)
 
 print("Web/C.wasm")
