@@ -1,5 +1,9 @@
 local lfs = require("lfs")
 
+local SourceFolders = {
+	"Source",
+}
+
 function ListAllFiles(Directory)
 	local Files = {}
 
@@ -15,7 +19,9 @@ function ListAllFiles(Directory)
 					table.insert(Files, SubFile)
 				end
 			else
-				table.insert(Files, FullPath)
+				if File:match("%.c$") then
+					table.insert(Files, FullPath)
+				end
 			end
 		end
 	end
@@ -23,21 +29,31 @@ function ListAllFiles(Directory)
 	return Files
 end
 
-lfs.mkdir("Build/")
+table.insert(SourceFolders, "Runtime/C")
 
-local CFiles = ListAllFiles("Source")
+lfs.mkdir("Build")
 local ObjectFiles = {}
+for _, SourceFolder in ipairs(SourceFolders) do
+	local Sources = ListAllFiles(SourceFolder)
 
-for _, CFile in ipairs(CFiles) do
-	lfs.mkdir("Build/" .. "Source")
+	for _, CFile in ipairs(Sources) do
+		print(CFile)
 
-	local Object = "Build/" .. CFile:gsub("%.c", ".o")
-	table.insert(ObjectFiles, Object)
+		local Object = "Build/" .. CFile:gsub("%.c$", ".o")
+		table.insert(ObjectFiles, Object)
 
-	local Command = string.format("emcc -c -o %s %s", Object, CFile)
-	os.execute(Command)
+		local Parent = Object:match("(.+)/[^/]+$")
+		if Parent then
+			os.execute('mkdir -p "' .. Parent .. '"')
+		end
+
+		local Command = string.format('emcc -c -o "%s" "%s"', Object, CFile)
+		os.execute(Command)
+	end
 end
 
 local Objects = table.concat(ObjectFiles, " ")
 local Command = string.format("emcc -o Web/C.wasm %s", Objects)
 os.execute(Command)
+
+print("Web/C.wasm")
