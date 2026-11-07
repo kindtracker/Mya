@@ -67,6 +67,7 @@ for _, SourceFolder in ipairs(SourceFolders) do
 			Execute('mkdir -p "' .. Parent .. '"')
 		end
 
-		CopyFile(File, Destination)
+		local Command = string.format("lua MyaC/Main.lua -o %s %s", Destination, File)
+		Execute(Command)
 	end
 end
