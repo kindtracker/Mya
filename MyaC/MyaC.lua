@@ -41,19 +41,94 @@ local function PrintTable(Value, Indent)
 	end
 end
 
+local Ansi = {
+	Reset = "\27[0m",
+	Yellow = "\27[33m",
+	Red = "\27[31m",
+	RuaRed = "\27[38;2;255;100;100m",
+	LuaBlue = "\27[38;2;100;200;255m",
+}
+
+local Logger = {}
+
+function Logger:Error(State, ErrorType, ErrorMessageFormat, ...)
+	local Format = "%sMyaC:%s %s:%d:%d: %sError:%s %s: %s\n"
+
+	State.ErrorMessage = string.format(ErrorMessageFormat, ...)
+
+	io.write(
+		string.format(
+			Format,
+			Ansi.RuaRed,
+			Ansi.Reset,
+			State.File.Name,
+			State.File.Row,
+			State.File.Column,
+			Ansi.Red,
+			Ansi.Reset,
+			ErrorType,
+			State.ErrorMessage
+		)
+	)
+
+	State.Stop = true
+
+	if Rua._DevMode then
+		io.write(
+			string.format(
+				"%sLua:%s traceback:\n%s\n",
+				Ansi.LuaBlue,
+				Ansi.Reset,
+				debug.traceback():gsub("stack traceback:\n", ""):gsub("	", "   ")
+			)
+		)
+	end
+
+	if ErrorType == "SyntaxError" then
+		Parser:Advance(State)
+	else
+		if os.exit then
+			os.exit(1)
+		else
+			assert(false, "")
+		end
+	end
+
+	return State.ErrorMessage
+end
+
 local Tokenizer = {}
 
 function Tokenizer:Reset(State)
 	Tokenizer.Character = ""
 	Tokenizer.Index = 1
 	Tokenizer.Token = {}
+	State.File.Row = 1
+	State.File.Column = 1
 end
 
 function Tokenizer:Advance(State, Step)
 	Step = Step or 1
 
-	Tokenizer.Index = Tokenizer.Index + Step
-	Tokenizer.Character = string.sub(State.File.Content, Tokenizer.Index, Tokenizer.Index)
+	if Step == 0 then
+		Tokenizer.Character = string.sub(State.File.Content, Tokenizer.Index, Tokenizer.Index)
+		return
+	end
+
+	local Direction = Step > 0 and 1 or -1
+
+	for _ = 1, math.abs(Step) do
+		Tokenizer.Index = Tokenizer.Index + Direction
+
+		Tokenizer.Character = string.sub(State.File.Content, Tokenizer.Index, Tokenizer.Index)
+
+		if Tokenizer.Character == "\n" then
+			State.File.Row = State.File.Row + Direction
+			State.File.Column = 1
+		else
+			State.File.Column = State.File.Column + Direction
+		end
+	end
 end
 
 function Tokenizer:NewToken(State)
@@ -65,6 +140,8 @@ function Tokenizer:Tokenize(State)
 	Tokenizer:Advance(State, 0)
 
 	while Tokenizer.Character ~= "" do
+		print(Tokenizer.Character)
+
 		if Tokenizer.Character == "<" then
 			Tokenizer.Token = {
 				Kind = "TagOpen",
@@ -79,8 +156,10 @@ function Tokenizer:Tokenize(State)
 
 			Tokenizer:NewToken(State)
 			Tokenizer:Advance(State)
+		elseif StringHasLetter(WhiteSpace, Tokenizer.Character) then
+			Tokenizer:Advance(State)
 		else
-			StringHasLetter(WhiteSpace, Tokenizer.Character)
+			Logger:Error(State, "SyntaxError", "Unexpected character: %q", Tokenizer.Character)
 			Tokenizer:Advance(State)
 		end
 	end
