@@ -1,5 +1,7 @@
 local MyaC = {}
 
+local BaseDigits = "0123456789"
+local BaseIdent = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_" .. BaseDigits
 local WhiteSpace = "\n\t\r "
 
 local function TableHasString(Table, Value)
@@ -140,22 +142,107 @@ function Tokenizer:Tokenize(State)
 	Tokenizer:Advance(State, 0)
 
 	while Tokenizer.Character ~= "" do
-		print(Tokenizer.Character)
-
 		if Tokenizer.Character == "<" then
 			Tokenizer.Token = {
 				Kind = "TagOpen",
 			}
+			Tokenizer:Advance(State)
+
+			if Tokenizer.Character == "/" then
+				Tokenizer.Token = {
+					Kind = "EndTagOpen",
+				}
+				Tokenizer:Advance(State)
+			end
 
 			Tokenizer:NewToken(State)
-			Tokenizer:Advance(State)
 		elseif Tokenizer.Character == ">" then
 			Tokenizer.Token = {
 				Kind = "TagClose",
 			}
+			Tokenizer:Advance(State)
+
+			if Tokenizer.Character == "/" then
+				Tokenizer.Token = {
+					Kind = "EndTagClose",
+				}
+				Tokenizer:Advance(State)
+			end
 
 			Tokenizer:NewToken(State)
+		elseif StringHasLetter(BaseIdent, Tokenizer.Character) then
+			local StartIndex = Tokenizer.Index
+
+			while StringHasLetter(BaseIdent, Tokenizer.Character) do
+				Tokenizer:Advance(State)
+			end
+
+			local EndIndex = Tokenizer.Index - 1
+			local Ident = State.File.Content:sub(StartIndex, EndIndex)
+
+			Tokenizer.Token = {
+				Kind = "Ident",
+				Value = Ident,
+			}
+			Tokenizer:NewToken(State)
+		elseif Tokenizer.Character == '"' then
 			Tokenizer:Advance(State)
+			local StartIndex = Tokenizer.Index
+
+			while Tokenizer.Character ~= '"' do
+				Tokenizer:Advance(State)
+			end
+
+			local EndIndex = Tokenizer.Index - 1
+			local String = State.File.Content:sub(StartIndex, EndIndex)
+
+			Tokenizer.Token = {
+				Kind = "String",
+				Value = String,
+			}
+			Tokenizer:NewToken(State)
+			Tokenizer:Advance(State)
+		elseif Tokenizer.Character == "-" then
+			Tokenizer:Advance(State)
+
+			if Tokenizer.Character ~= "-" then
+				Logger:Error(State, "SyntaxError", "Unexpected character: %q", "-")
+				return
+			end
+
+			Tokenizer:Advance(State)
+
+			local IsMultipleLineComment = false
+
+			if Tokenizer.Character == "[" then
+				Tokenizer:Advance(State)
+
+				if Tokenizer.Character == "[" then
+					IsMultipleLineComment = true
+					Tokenizer:Advance(State)
+				end
+			end
+
+			while Tokenizer.Character ~= "" do
+				if IsMultipleLineComment then
+					if Tokenizer.Character == "]" then
+						Tokenizer:Advance(State)
+
+						if Tokenizer.Character == "]" then
+							Tokenizer:Advance(State)
+							break
+						end
+					else
+						Tokenizer:Advance(State)
+					end
+				else
+					if Tokenizer.Character == "\n" then
+						break
+					end
+
+					Tokenizer:Advance(State)
+				end
+			end
 		elseif StringHasLetter(WhiteSpace, Tokenizer.Character) then
 			Tokenizer:Advance(State)
 		else
