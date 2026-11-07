@@ -31,11 +31,13 @@ local ObjectFiles = {}
 for _, CFile in ipairs(CFiles) do
 	lfs.mkdir("Build/" .. "Source")
 
-	local Object = CFile:gsub("%.c", ".o")
+	local Object = "Build/" .. CFile:gsub("%.c", ".o")
 	table.insert(ObjectFiles, Object)
 
-	local Command = string.format("emcc -c -o Build/%s %s", Object, CFile)
+	local Command = string.format("emcc -c -o %s %s", Object, CFile)
 	os.execute(Command)
 end
 
 local Objects = table.concat(ObjectFiles, " ")
+local Command = string.format("emcc -o Web/C.wasm %s", Objects)
+os.execute(Command)
