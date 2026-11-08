@@ -805,7 +805,17 @@ function Parser:ParseText(State)
 		Value = DecodeEntities(Value)
 	end
 
-	if Value ~= "" then
+	local IsTextWhitespace = true
+	for Index = 1, #Value do
+		local Character = Value:sub(Index, Index)
+
+		if not IsWhitespace(Character) then
+			IsTextWhitespace = false
+			break
+		end
+	end
+
+	if Value ~= "" and not IsTextWhitespace then
 		self:Append({
 			Kind = "Text",
 			Value = Value,
