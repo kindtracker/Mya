@@ -2,9 +2,12 @@ local lfs = require("lfs")
 
 local SourceFolders = { "Web/Html" }
 
+local Compiler = "gcc"
+local CFlags = "-O2 -flto=auto"
+local LDFlags = "-O2 -flto=auto"
+
 local OutputFolder = "Output"
 local BuildFolder = "Build"
-local Compiler = "gcc"
 
 local function ListAllFiles(Directory, Extension)
   local Files = {}
@@ -83,7 +86,7 @@ for _, File in ipairs(CFiles) do
     MakeDirectory(Parent)
   end
 
-  Execute(string.format('%s -c "%s" -o "%s" -IRuntime', Compiler, File, ObjectFile))
+  Execute(string.format('%s -c "%s" -o "%s" -IRuntime %s', Compiler, File, ObjectFile, CFlags))
 
   table.insert(ObjectFiles, ObjectFile)
 end
@@ -91,11 +94,13 @@ end
 local RuntimeObject = BuildFolder .. "/Mya.o"
 local RuntimeMainObject = BuildFolder .. "/MyaMain.o"
 
-Execute(string.format('%s -c Runtime/Mya.c -o "%s" -I.', Compiler, RuntimeObject))
+Execute(string.format('%s -c Runtime/Mya.c -o "%s" -I. %s', Compiler, RuntimeObject, CFlags))
 table.insert(ObjectFiles, RuntimeObject)
 
-Execute(string.format('%s -c Runtime/Main.c -o "%s" -I.', Compiler, RuntimeMainObject))
+Execute(string.format('%s -c Runtime/Main.c -o "%s" -I. %s', Compiler, RuntimeMainObject, CFlags))
 table.insert(ObjectFiles, RuntimeMainObject)
 
-Execute(string.format('%s -lSDL3 %s -o "%s"', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya"))
+Execute(
+  string.format('%s -lSDL3 %s -o "%s" %s', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya", LDFlags)
+)
 print(BuildFolder .. "/Mya")

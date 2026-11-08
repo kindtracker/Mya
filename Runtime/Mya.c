@@ -110,6 +110,8 @@ void MyaDestroy(MyaElement *Element) {
     return;
   }
 
+  MyaDetach(Element);
+
   MyaElement *Child = Element->FirstChild;
   while (Child) {
     MyaElement *Next = Child->NextSibling;

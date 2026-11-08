@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL.h>
 
+#include <SDL3/SDL_oldnames.h>
+#include <SDL3/SDL_render.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +31,7 @@ static void HandleClayError(Clay_ErrorData Error) {
           Error.errorText.chars);
 }
 
-static void MyaDeclareElement(MyaElement *Element) {
+static void MyaGenerateClayLayout(MyaElement *Element) {
   if (!Element) {
     return;
   }
@@ -51,7 +53,7 @@ static void MyaDeclareElement(MyaElement *Element) {
 
     for (MyaElement *Child = Element->FirstChild; Child;
          Child = Child->NextSibling) {
-      MyaDeclareElement(Child);
+      MyaGenerateClayLayout(Child);
     }
   }
 }
@@ -59,43 +61,33 @@ static void MyaDeclareElement(MyaElement *Element) {
 static void RenderClay(Clay_RenderCommandArray Commands) {
   for (int32_t i = 0; i < Commands.length; i++) {
     Clay_RenderCommand *Command = &Commands.internalArray[i];
-
     Clay_BoundingBox Box = Command->boundingBox;
-
     SDL_FRect Rect = {.x = Box.x, .y = Box.y, .w = Box.width, .h = Box.height};
 
     switch (Command->commandType) {
     case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
       Clay_Color Color = Command->renderData.rectangle.backgroundColor;
-
       SDL_SetRenderDrawColor(Renderer, (Uint8)Color.r, (Uint8)Color.g,
                              (Uint8)Color.b, (Uint8)Color.a);
-
       SDL_RenderFillRect(Renderer, &Rect);
       break;
     }
 
     case CLAY_RENDER_COMMAND_TYPE_TEXT: {
       Clay_TextRenderData *Text = &Command->renderData.text;
+      char Buffer[4096 * 4];
 
-      char *Buffer = malloc((size_t)Text->stringContents.length + 1);
-
-      if (!Buffer) {
-        break;
+      size_t Length = (size_t)Text->stringContents.length;
+      if (Length >= sizeof(Buffer)) {
+        Length = sizeof(Buffer) - 1;
       }
 
-      memcpy(Buffer, Text->stringContents.chars,
-             (size_t)Text->stringContents.length);
-
-      Buffer[Text->stringContents.length] = '\0';
-
+      memcpy(Buffer, Text->stringContents.chars, Length);
+      Buffer[Length] = '\0';
       SDL_SetRenderDrawColor(Renderer, (Uint8)Text->textColor.r,
                              (Uint8)Text->textColor.g, (Uint8)Text->textColor.b,
                              (Uint8)Text->textColor.a);
-
       SDL_RenderDebugText(Renderer, Box.x, Box.y, Buffer);
-
-      free(Buffer);
       break;
     }
 
@@ -129,6 +121,7 @@ int main(int argc, char **argv) {
     SDL_Quit();
     return 1;
   }
+  SDL_SetRenderVSync(Renderer, 1);
 
   MyaElement *Page = MyaCreatePage();
   if (!Page) {
@@ -173,34 +166,29 @@ int main(int argc, char **argv) {
       }
     }
 
-    // Get the current renderer dimensions.
     SDL_GetRenderOutputSize(Renderer, &Width, &Height);
-
     Clay_SetLayoutDimensions(
         (Clay_Dimensions){.width = (float)Width, .height = (float)Height});
 
-    // Update Clay's mouse state.
     float MouseX, MouseY;
     SDL_MouseButtonFlags MouseButtons = SDL_GetMouseState(&MouseX, &MouseY);
-
     Clay_SetPointerState((Clay_Vector2){.x = MouseX, .y = MouseY},
                          (MouseButtons & SDL_BUTTON_LMASK) != 0);
 
     Clay_BeginLayout();
 
     CLAY_AUTO_ID(
-        {.layout =
-             {.sizing = {.width = CLAY_SIZING_GROW(0),
-                         .height = CLAY_SIZING_GROW(0)},
-              .padding = {.left = 16, .right = 16, .top = 16, .bottom = 16},
-              .layoutDirection = CLAY_TOP_TO_BOTTOM},
+        {.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
+                               .height = CLAY_SIZING_GROW(0)},
+                    .padding = {.left = 0, .right = 0, .top = 0, .bottom = 0},
+                    .layoutDirection = CLAY_TOP_TO_BOTTOM},
          .backgroundColor = {25, 25, 30, 255}}) {
-      MyaDeclareElement(Page);
+      MyaGenerateClayLayout(Page);
     }
 
     Clay_RenderCommandArray Commands = Clay_EndLayout(0);
 
-    SDL_SetRenderDrawColor(Renderer, 25, 25, 30, 255);
+    SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
     SDL_RenderClear(Renderer);
 
     RenderClay(Commands);
