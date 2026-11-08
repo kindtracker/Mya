@@ -1,6 +1,6 @@
 local lfs = require("lfs")
 
-local SourceFolders = {}
+local SourceFolders = { "Web/Html" }
 
 local function ListAllFiles(Directory)
 	local Files = {}
@@ -47,8 +47,6 @@ function Execute(Command)
 	return Success
 end
 
-table.insert(SourceFolders, "Runtime/Html")
-
 for _, SourceFolder in ipairs(SourceFolders) do
 	local Sources = ListAllFiles(SourceFolder)
 
@@ -57,9 +55,9 @@ for _, SourceFolder in ipairs(SourceFolders) do
 
 		if SourceFolder == "Runtime/Html" then
 			local Filename = File:match("[^/]+$")
-			Destination = "Web/" .. Filename
+			Destination = "Output/" .. Filename
 		else
-			Destination = "Web/" .. File
+			Destination = "Output/" .. File
 		end
 
 		local Parent = Destination:match("(.+)/[^/]+$")
@@ -67,7 +65,7 @@ for _, SourceFolder in ipairs(SourceFolders) do
 			Execute('mkdir -p "' .. Parent .. '"')
 		end
 
-		local Command = string.format("lua MyaC/Main.lua -o %s %s", Destination, File)
+		local Command = string.format("luajit MyaC/Main.lua -o %s %s", Destination, File)
 		Execute(Command)
 	end
 end

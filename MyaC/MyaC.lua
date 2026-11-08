@@ -899,6 +899,10 @@ function MyaC:Parse(State)
 	return Parser:Parse(State)
 end
 
+function MyaC:UseBackend(State, Backend)
+	State.Backend = Backend
+end
+
 function MyaC:Compile(State, FileName, OutputFile)
 	local FilePtr, Error = io.open(FileName, "r")
 
@@ -921,7 +925,15 @@ function MyaC:Compile(State, FileName, OutputFile)
 
 	PrintTable(State.Ast)
 
-	return State.Ast
+	State.Backend:Compile(State)
+
+	if OutputFile then
+		local OutputPtr = io.open(OutputFile, "w")
+		OutputPtr:write(State.Backend.Output)
+		OutputPtr:close()
+	end
+
+	return State.Backend.Output
 end
 
 return MyaC

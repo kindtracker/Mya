@@ -1,4 +1,5 @@
 local MyaC = require("MyaC.MyaC")
+local CBackend = require("MyaC.Backends.CBackend")
 
 local State = MyaC.new()
 
@@ -26,4 +27,5 @@ if FileName == nil then
 	return
 end
 
+MyaC:UseBackend(State, CBackend)
 local Result, Error = MyaC:Compile(State, FileName, OutputFile)

@@ -1,7 +1,7 @@
 local lfs = require("lfs")
 
 local SourceFolders = {
-	"Source",
+	"Web/C",
 }
 
 local IncludeFolders = {}
@@ -62,7 +62,6 @@ end
 
 CFlags = CFlags .. " -fsanitize=" .. Sanitizers
 LDFlags = LDFlags .. " -fsanitize=" .. Sanitizers
-table.insert(SourceFolders, "Runtime/C")
 
 lfs.mkdir("Build")
 local ObjectFiles = {}
@@ -80,13 +79,15 @@ for _, SourceFolder in ipairs(SourceFolders) do
 			os.execute('mkdir -p "' .. Parent .. '"')
 		end
 
-		local Command = string.format("emcc -c -o %q %q %s", Object, CFile, CFlags)
+		local Command = string.format("cc -c -o %q %q %s", Object, CFile, CFlags)
 		Execute(Command)
 	end
 end
 
+--[[
 local Objects = table.concat(ObjectFiles, " ")
 local Command = string.format("emcc -o Web/C.js %s %s", Objects, LDFlags)
 Execute(Command)
 
 print("Web/C.wasm")
+]]
