@@ -2,7 +2,11 @@ local lfs = require("lfs")
 
 local SourceFolders = { "Web/Html" }
 
-local function ListAllFiles(Directory)
+local OutputFolder = "Output"
+local BuildFolder = "Build"
+local Compiler = "gcc"
+
+local function ListAllFiles(Directory, Extension)
   local Files = {}
 
   for File in lfs.dir(Directory) do
@@ -11,15 +15,13 @@ local function ListAllFiles(Directory)
       local Attributes = lfs.attributes(FullPath)
 
       if Attributes.mode == "directory" then
-        local SubFiles = ListAllFiles(FullPath)
+        local SubFiles = ListAllFiles(FullPath, Extension)
 
         for _, SubFile in ipairs(SubFiles) do
           table.insert(Files, SubFile)
         end
-      else
-        if File:match("%.html$") then
-          table.insert(Files, FullPath)
-        end
+      elseif File:match("%." .. Extension .. "$") then
+        table.insert(Files, FullPath)
       end
     end
   end
@@ -27,19 +29,11 @@ local function ListAllFiles(Directory)
   return Files
 end
 
-local function CopyFile(Source, Destination)
-  local InputPtr = assert(io.open(Source, "rb"))
-  local OutputPtr = assert(io.open(Destination, "wb"))
-  local FileContent = InputPtr:read("*a")
-  OutputPtr:write(FileContent)
-  InputPtr:close()
-  OutputPtr:close()
-end
-
-function Execute(Command)
-  -- print("> " .. Command)
+local function Execute(Command)
+  print("> " .. Command)
 
   local Success, Type, Code = os.execute(Command)
+
   if not Success then
     error(string.format("Command failed (exit code: %s): %s", tostring(Code), Command))
   end
@@ -47,26 +41,57 @@ function Execute(Command)
   return Success
 end
 
+local function MakeDirectory(Directory)
+  Execute('mkdir -p "' .. Directory .. '"')
+end
+
+local function CopyFile(Source, Destination)
+  local InputPtr = assert(io.open(Source, "rb"))
+  local OutputPtr = assert(io.open(Destination, "wb"))
+
+  OutputPtr:write(InputPtr:read("*a"))
+
+  InputPtr:close()
+  OutputPtr:close()
+end
+
+MakeDirectory(OutputFolder)
+MakeDirectory(BuildFolder)
+
 for _, SourceFolder in ipairs(SourceFolders) do
-  local Sources = ListAllFiles(SourceFolder)
+  local Sources = ListAllFiles(SourceFolder, "html")
 
   for _, File in ipairs(Sources) do
-    local Destination
-
-    if SourceFolder == "Runtime/Html" then
-      local Filename = File:match("[^/]+$")
-      Destination = "Output/" .. Filename
-    else
-      Destination = "Output/" .. File
-    end
-    Destination = Destination .. ".c"
-
+    local Destination = OutputFolder .. "/" .. File .. ".c"
     local Parent = Destination:match("(.+)/[^/]+$")
+
     if Parent then
-      Execute('mkdir -p "' .. Parent .. '"')
+      MakeDirectory(Parent)
     end
 
-    local Command = string.format("luajit MyaC/Main.lua -o %s %s", Destination, File)
-    Execute(Command)
+    Execute(string.format('luajit MyaC/Main.lua -o "%s" "%s"', Destination, File))
   end
 end
+
+local CFiles = ListAllFiles(OutputFolder, "c")
+local ObjectFiles = {}
+for _, File in ipairs(CFiles) do
+  local ObjectFile = BuildFolder .. "/" .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
+
+  local Parent = ObjectFile:match("(.+)/[^/]+$")
+  if Parent then
+    MakeDirectory(Parent)
+  end
+
+  Execute(string.format('%s -c "%s" -o "%s" -IRuntime', Compiler, File, ObjectFile))
+
+  table.insert(ObjectFiles, ObjectFile)
+end
+
+local RuntimeObject = BuildFolder .. "/Mya.o"
+
+Execute(string.format('%s -c Runtime/Mya.c -o "%s" -I.', Compiler, RuntimeObject))
+table.insert(ObjectFiles, RuntimeObject)
+
+Execute(string.format('%s %s -o "%s"', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya"))
+print(BuildFolder .. "/Mya")
