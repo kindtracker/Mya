@@ -639,7 +639,17 @@ end
 function Parser:Append(Node)
   local Parent = self:Current()
 
-  Node.Id = tostring(math.floor(math.random() * 0xFFFFFFFF))
+  local Characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"
+  local IdTable = {}
+
+  for Idx = 1, 16 do
+    local RandomIndex = math.random(#Characters)
+    IdTable[Idx] = Characters:sub(RandomIndex, RandomIndex)
+  end
+
+  local Id = "__Mya_" .. table.concat(IdTable)
+  Node.Id = Id
+
   table.insert(Parent.Children, Node)
 end
 

@@ -103,7 +103,11 @@ function CBackend:GenerateStyles(State, ElementId, Style)
     local Value = Style[Property]
 
     if Value ~= nil and Value ~= Default then
-      self:PutFormatted(State, "MyaElement_Set%s(Element%s, %q);\n", Setter, tostring(ElementId), tostring(Value))
+      if type(Value) == "string" then
+        self:PutFormatted(State, "MyaSet%s(%s, %q);\n", Setter, ElementId, Value)
+      else
+        self:PutFormatted(State, "MyaSet%s(%s, %s);\n", Setter, ElementId, tostring(Value))
+      end
     end
   end
 end
@@ -114,21 +118,21 @@ function CBackend:Generate(State, Ast, Parent, ParentStyle)
   local Style = self:GetStyleFromAst(Ast, ParentStyle)
 
   if Ast.Kind == "Element" then
-    self:PutFormatted(State, "MyaElement *Element%s = MyaElement_Create(%q);\n", Ast.Id, Ast.TagName)
+    self:PutFormatted(State, "MyaElement *%s = MyaElement_Create(%q);\n", Ast.Id, Ast.TagName)
     self:GenerateStyles(State, Ast.Id, Style)
     if Parent then
-      self:PutFormatted(State, "MyaElement_AppendChild(Element%s, Element%s);\n", Parent.Id, Ast.Id)
+      self:PutFormatted(State, "MyaAppendChild(%s, %s);\n", Parent.Id, Ast.Id)
     end
 
     for Key, Value in pairs(Ast.Attributes) do
-      self:PutFormatted(State, "MyaElement_SetAttribute(Element%d, %q, %q);\n", Ast.Id, Key, Value)
+      self:PutFormatted(State, "MyaSetAttribute(%s, %q, %q);\n", Ast.Id, Key, Value)
     end
 
     for _, Child in ipairs(Ast.Children) do
       self:Generate(State, Child, Ast, Style)
     end
   elseif Ast.Kind == "Text" then
-    self:PutFormatted(State, "MyaElement_SetText(Element%d, %q);\n", Parent.Id, Ast.Content)
+    self:PutFormatted(State, "MyaSetText(%s, %q);\n", Parent.Id, Ast.Content)
   elseif Ast.Kind == "Comment" then
   elseif Ast.Kind == "Doctype" then
   elseif Ast.Kind == "Document" then
@@ -138,11 +142,11 @@ end
 function CBackend:Compile(State)
   self.CCode = ""
 
-  self:PutFormatted(State, 'MyaElement *Document = MyaElement_Create("document");\n')
+  self:PutFormatted(State, 'MyaElement *__Mya_Document = MyaCreate("document");\n')
 
   for _, Ast in ipairs(State.Ast) do
     self:Generate(State, Ast, {
-      Id = "Document",
+      Id = "__Mya_Document",
     })
   end
 
