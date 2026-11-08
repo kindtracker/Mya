@@ -14,3 +14,5 @@ MyaElement *MyaCreate(const char *TagName);
 int MyaAppendChild(MyaElement *Parent, MyaElement *Child);
 void MyaSetText(MyaElement *Element, const char *Text);
 void MyaDestroy(MyaElement *Element);
+
+MyaElement *MyaCreatePage();

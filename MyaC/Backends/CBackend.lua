@@ -149,7 +149,7 @@ function CBackend:Compile(State)
 
 static MyaElement *__Mya_Document;
 
-int MyaCreatePage() {
+MyaElement *MyaCreatePage() {
   __Mya_Document = MyaCreate("document");
 ]]
   )
@@ -160,7 +160,14 @@ int MyaCreatePage() {
     })
   end
 
-  self:PutFormatted(State, "}")
+  self:PutFormatted(
+    State,
+    [[
+
+  return __Mya_Document;
+}
+]]
+  )
 
   self.Output = self.CCode
   return self.CCode

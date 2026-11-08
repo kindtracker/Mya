@@ -89,9 +89,13 @@ for _, File in ipairs(CFiles) do
 end
 
 local RuntimeObject = BuildFolder .. "/Mya.o"
+local RuntimeMainObject = BuildFolder .. "/MyaMain.o"
 
 Execute(string.format('%s -c Runtime/Mya.c -o "%s" -I.', Compiler, RuntimeObject))
 table.insert(ObjectFiles, RuntimeObject)
 
-Execute(string.format('%s %s -o "%s"', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya"))
+Execute(string.format('%s -c Runtime/Main.c -o "%s" -I.', Compiler, RuntimeMainObject))
+table.insert(ObjectFiles, RuntimeMainObject)
+
+Execute(string.format('%s -lSDL3 %s -o "%s"', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya"))
 print(BuildFolder .. "/Mya")
