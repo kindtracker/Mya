@@ -893,6 +893,7 @@ function MyaC:Tokenize(State)
 end
 
 function MyaC:Parse(State)
+  Parser:Reset(State)
   return Parser:Parse(State)
 end
 

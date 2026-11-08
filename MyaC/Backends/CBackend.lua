@@ -120,11 +120,18 @@ function CBackend:Generate(State, Ast, Parent, ParentStyle)
       self:PutFormatted(State, "MyaElement_AppendChild(Element%s, Element%s);\n", Parent.Id, Ast.Id)
     end
 
+    for Key, Value in pairs(Ast.Attributes) do
+      self:PutFormatted(State, "MyaElement_SetAttribute(Element%d, %q, %q);\n", Ast.Id, Key, Value)
+    end
+
     for _, Child in ipairs(Ast.Children) do
       self:Generate(State, Child, Ast, Style)
     end
   elseif Ast.Kind == "Text" then
     self:PutFormatted(State, "MyaElement_SetText(Element%d, %q);\n", Parent.Id, Ast.Content)
+  elseif Ast.Kind == "Comment" then
+  elseif Ast.Kind == "Doctype" then
+  elseif Ast.Kind == "Document" then
   end
 end
 
