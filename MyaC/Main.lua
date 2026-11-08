@@ -9,22 +9,22 @@ local OutputFile = nil
 local ArgumentIndex = 1
 
 while ArgumentIndex <= #arg do
-	local Argument = arg[ArgumentIndex]
+  local Argument = arg[ArgumentIndex]
 
-	if Argument == "_DevMode" then
-		MyaC._DevMode = true
-	elseif Argument == "-o" then
-		OutputFile = arg[ArgumentIndex + 1]
-		ArgumentIndex = ArgumentIndex + 1
-	else
-		FileName = Argument
-	end
+  if Argument == "_DevMode" then
+    MyaC._DevMode = true
+  elseif Argument == "-o" then
+    OutputFile = arg[ArgumentIndex + 1]
+    ArgumentIndex = ArgumentIndex + 1
+  else
+    FileName = Argument
+  end
 
-	ArgumentIndex = ArgumentIndex + 1
+  ArgumentIndex = ArgumentIndex + 1
 end
 
 if FileName == nil then
-	return
+  return
 end
 
 MyaC:UseBackend(State, CBackend)
