@@ -1,7 +1,15 @@
 local CBackend = {}
 
 function CBackend:PutFormatted(State, Format, ...)
-  CBackend.CCode = CBackend.CCode .. string.format(Format, ...)
+  local Output = string.format(Format, ...)
+
+  Output = Output:gsub("\n([^\n])", "\n" .. string.rep("\t", CBackend.Indent) .. "%1")
+
+  if self.CCode == "" or self.CCode:sub(-1) == "\n" then
+    Output = string.rep("\t", CBackend.Indent) .. Output
+  end
+
+  self.CCode = self.CCode .. Output
 end
 
 function CBackend:Generate(State, Ast)
@@ -21,9 +29,11 @@ CLAY({
 ]]
       )
 
+      CBackend.Indent = CBackend.Indent + 1
       for _, Child in ipairs(Ast.Children) do
         self:Generate(State, Child)
       end
+      CBackend.Indent = CBackend.Indent - 1
 
       self:PutFormatted(State, "}\n")
     end
@@ -35,6 +45,7 @@ end
 function CBackend:Compile(State)
   self.CCode = ""
 
+  CBackend.Indent = 0
   for _, Ast in ipairs(State.Ast) do
     self:Generate(State, Ast)
   end
