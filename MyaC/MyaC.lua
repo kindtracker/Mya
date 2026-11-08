@@ -639,6 +639,7 @@ end
 function Parser:Append(Node)
   local Parent = self:Current()
 
+  Node.Id = tostring(math.floor(math.random() * 0xFFFFFFFF))
   table.insert(Parent.Children, Node)
 end
 

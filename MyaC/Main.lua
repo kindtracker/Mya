@@ -1,6 +1,8 @@
 local MyaC = require("MyaC.MyaC")
 local CBackend = require("MyaC.Backends.CBackend")
 
+math.randomseed(os.time())
+
 local State = MyaC.new()
 
 local FileName = nil
