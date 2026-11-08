@@ -1,9 +1,9 @@
-local MyaC = require("MyaC.MyaC")
-local CBackend = require("MyaC.Backends.CBackend")
+local Mya = require("Mya.Mya")
+local CBackend = require("Mya.Backends.CBackend")
 
 math.randomseed(os.time())
 
-local State = MyaC.new()
+local State = Mya.new()
 
 local FileName = nil
 local OutputFile = nil
@@ -14,7 +14,7 @@ while ArgumentIndex <= #arg do
   local Argument = arg[ArgumentIndex]
 
   if Argument == "_DevMode" then
-    MyaC._DevMode = true
+    Mya._DevMode = true
   elseif Argument == "-o" then
     OutputFile = arg[ArgumentIndex + 1]
     ArgumentIndex = ArgumentIndex + 1
@@ -29,5 +29,5 @@ if FileName == nil then
   return
 end
 
-MyaC:UseBackend(State, CBackend)
-local Result, Error = MyaC:Compile(State, FileName, OutputFile)
+Mya:UseBackend(State, CBackend)
+local Result, Error = Mya:Compile(State, FileName, OutputFile)

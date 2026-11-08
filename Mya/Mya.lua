@@ -1,4 +1,4 @@
-local MyaC = {}
+local Mya = {}
 
 local VoidElements = {
   area = true,
@@ -233,7 +233,7 @@ function Logger:Error(State, ErrorType, ErrorMessage, Row, Column)
 
   io.write(
     string.format(
-      "%sMyaC:%s %s:%d:%d: %sError:%s %s: %s\n",
+      "%sMya:%s %s:%d:%d: %sError:%s %s: %s\n",
       Ansi.RuaRed,
       Ansi.Reset,
       State.File.Name,
@@ -246,7 +246,7 @@ function Logger:Error(State, ErrorType, ErrorMessage, Row, Column)
     )
   )
 
-  if MyaC._DevMode then
+  if Mya._DevMode then
     io.write(
       string.format(
         "%sLua:%s traceback:\n%s\n",
@@ -876,7 +876,7 @@ function Parser:Parse(State)
   return true
 end
 
-function MyaC.new()
+function Mya.new()
   return {
     File = {
       Content = "",
@@ -895,23 +895,23 @@ function MyaC.new()
   }
 end
 
-function MyaC:Tokenize(State)
+function Mya:Tokenize(State)
   Tokenizer:Reset(State)
   Tokenizer:Tokenize(State)
 
   return not State.Stop
 end
 
-function MyaC:Parse(State)
+function Mya:Parse(State)
   Parser:Reset(State)
   return Parser:Parse(State)
 end
 
-function MyaC:UseBackend(State, Backend)
+function Mya:UseBackend(State, Backend)
   State.Backend = Backend
 end
 
-function MyaC:Compile(State, FileName, OutputFile)
+function Mya:Compile(State, FileName, OutputFile)
   local FilePtr, Error = io.open(FileName, "r")
 
   if not FilePtr then
@@ -944,4 +944,4 @@ function MyaC:Compile(State, FileName, OutputFile)
   return State.Backend.Output
 end
 
-return MyaC
+return Mya

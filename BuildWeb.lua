@@ -69,7 +69,7 @@ for _, SourceFolder in ipairs(SourceFolders) do
       MakeDirectory(Parent)
     end
 
-    Execute(string.format('luajit MyaC/Main.lua -o "%s" "%s"', Destination, File))
+    Execute(string.format('luajit Mya/Main.lua -o "%s" "%s"', Destination, File))
   end
 end
 
