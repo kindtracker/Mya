@@ -118,7 +118,7 @@ function CBackend:Generate(State, Ast, Parent, ParentStyle)
   local Style = self:GetStyleFromAst(Ast, ParentStyle)
 
   if Ast.Kind == "Element" then
-    self:PutFormatted(State, "MyaElement *%s = MyaElement_Create(%q);\n", Ast.Id, Ast.TagName)
+    self:PutFormatted(State, "MyaElement *%s = MyaCreate(%q);\n", Ast.Id, Ast.TagName)
     self:GenerateStyles(State, Ast.Id, Style)
     if Parent then
       self:PutFormatted(State, "MyaAppendChild(%s, %s);\n", Parent.Id, Ast.Id)
