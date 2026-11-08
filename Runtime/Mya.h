@@ -1,4 +1,6 @@
 #pragma once
+#include "Clay.h"
+#include <SDL3/SDL.h>
 #include <stddef.h>
 
 typedef struct MyaEntry {
@@ -25,3 +27,10 @@ void MyaSetText(MyaElement *Element, const char *Text);
 void MyaDestroy(MyaElement *Element);
 
 MyaElement *MyaCreatePage();
+
+// Internal
+extern SDL_Window *Window;
+extern SDL_Renderer *Renderer;
+
+void MyaGenerateClayLayout(MyaElement *Element);
+void MyaRenderClay(Clay_RenderCommandArray Commands);

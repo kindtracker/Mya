@@ -14,8 +14,8 @@
 
 extern MyaElement *MyaCreatePage(void);
 
-static SDL_Window *Window;
-static SDL_Renderer *Renderer;
+SDL_Window *Window;
+SDL_Renderer *Renderer;
 
 static Clay_Dimensions MeasureText(Clay_StringSlice Text,
                                    Clay_TextElementConfig *Config,
@@ -29,80 +29,6 @@ static Clay_Dimensions MeasureText(Clay_StringSlice Text,
 static void HandleClayError(Clay_ErrorData Error) {
   fprintf(stderr, "Clay error: %.*s\n", Error.errorText.length,
           Error.errorText.chars);
-}
-
-static void MyaGenerateClayLayout(MyaElement *Element) {
-  if (!Element) {
-    return;
-  }
-
-  CLAY_AUTO_ID(
-      {.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
-                             .height = CLAY_SIZING_FIT(0)},
-                  .padding = {.left = 8, .right = 8, .top = 8, .bottom = 8},
-                  .childGap = 4,
-                  .layoutDirection = CLAY_TOP_TO_BOTTOM},
-       .backgroundColor = {40, 40, 48, 255}}) {
-    if (Element->Text && Element->Text[0] != '\0') {
-      Clay_String Text = {.isStaticallyAllocated = false,
-                          .length = (int32_t)strlen(Element->Text),
-                          .chars = Element->Text};
-
-      CLAY_TEXT(Text, {.fontSize = 8, .textColor = {240, 240, 240, 255}});
-    }
-
-    for (MyaElement *Child = Element->FirstChild; Child;
-         Child = Child->NextSibling) {
-      MyaGenerateClayLayout(Child);
-    }
-  }
-}
-
-static void RenderClay(Clay_RenderCommandArray Commands) {
-  for (int32_t i = 0; i < Commands.length; i++) {
-    Clay_RenderCommand *Command = &Commands.internalArray[i];
-    Clay_BoundingBox Box = Command->boundingBox;
-    SDL_FRect Rect = {.x = Box.x, .y = Box.y, .w = Box.width, .h = Box.height};
-
-    switch (Command->commandType) {
-    case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
-      Clay_Color Color = Command->renderData.rectangle.backgroundColor;
-      SDL_SetRenderDrawColor(Renderer, (Uint8)Color.r, (Uint8)Color.g,
-                             (Uint8)Color.b, (Uint8)Color.a);
-      SDL_RenderFillRect(Renderer, &Rect);
-      break;
-    }
-
-    case CLAY_RENDER_COMMAND_TYPE_TEXT: {
-      Clay_TextRenderData *Text = &Command->renderData.text;
-      char Buffer[4096 * 4];
-
-      size_t Length = (size_t)Text->stringContents.length;
-      if (Length >= sizeof(Buffer)) {
-        Length = sizeof(Buffer) - 1;
-      }
-
-      memcpy(Buffer, Text->stringContents.chars, Length);
-      Buffer[Length] = '\0';
-      SDL_SetRenderDrawColor(Renderer, (Uint8)Text->textColor.r,
-                             (Uint8)Text->textColor.g, (Uint8)Text->textColor.b,
-                             (Uint8)Text->textColor.a);
-      SDL_RenderDebugText(Renderer, Box.x, Box.y, Buffer);
-      break;
-    }
-
-    case CLAY_RENDER_COMMAND_TYPE_BORDER:
-    case CLAY_RENDER_COMMAND_TYPE_IMAGE:
-    case CLAY_RENDER_COMMAND_TYPE_CUSTOM:
-    case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START:
-    case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END:
-    case CLAY_RENDER_COMMAND_TYPE_OVERLAY_COLOR_START:
-    case CLAY_RENDER_COMMAND_TYPE_OVERLAY_COLOR_END:
-    case CLAY_RENDER_COMMAND_TYPE_NONE:
-      // TODO: Implement these commands
-      break;
-    }
-  }
 }
 
 int main(int argc, char **argv) {
@@ -191,7 +117,7 @@ int main(int argc, char **argv) {
     SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
     SDL_RenderClear(Renderer);
 
-    RenderClay(Commands);
+    MyaRenderClay(Commands);
 
     SDL_RenderPresent(Renderer);
   }

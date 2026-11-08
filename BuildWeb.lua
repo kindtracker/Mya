@@ -77,6 +77,12 @@ for _, SourceFolder in ipairs(SourceFolders) do
 end
 
 local CFiles = ListAllFiles(OutputFolder, "c")
+
+local RuntimeCFiles = ListAllFiles("Runtime", "c")
+for _, CFile in ipairs(RuntimeCFiles) do
+  table.insert(CFiles, CFile)
+end
+
 local ObjectFiles = {}
 for _, File in ipairs(CFiles) do
   local ObjectFile = BuildFolder .. "/" .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
@@ -90,15 +96,6 @@ for _, File in ipairs(CFiles) do
 
   table.insert(ObjectFiles, ObjectFile)
 end
-
-local RuntimeObject = BuildFolder .. "/Mya.o"
-local RuntimeMainObject = BuildFolder .. "/MyaMain.o"
-
-Execute(string.format('%s -c Runtime/Mya.c -o "%s" -I. %s', Compiler, RuntimeObject, CFlags))
-table.insert(ObjectFiles, RuntimeObject)
-
-Execute(string.format('%s -c Runtime/Main.c -o "%s" -I. %s', Compiler, RuntimeMainObject, CFlags))
-table.insert(ObjectFiles, RuntimeMainObject)
 
 Execute(
   string.format('%s -lSDL3 %s -o "%s" %s', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya", LDFlags)
