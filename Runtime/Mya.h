@@ -1,6 +1,7 @@
 #pragma once
 #include "Clay.h"
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <stddef.h>
 
 typedef struct MyaEntry {
@@ -30,9 +31,6 @@ const char *MyaGetStyle(MyaElement *Element, const char *Key);
 MyaElement *MyaCreatePage();
 
 // Internal
-extern SDL_Window *Window;
-extern SDL_Renderer *Renderer;
-
 typedef enum {
   MYA_UNIT_NONE,
   MYA_UNIT_PX,
@@ -67,5 +65,18 @@ typedef struct {
   float ReferenceHeight;
 } MyaUnitContext;
 
+typedef struct MyaFontEntry {
+  const char *FontName;
+  int FontSize;
+  TTF_Font *Font;
+  struct MyaFontEntry *Next;
+} MyaFontEntry;
+
+extern SDL_Window *Window;
+extern SDL_Renderer *Renderer;
+extern MyaFontEntry *Fonts;
+extern int FontCount;
+
 void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext);
 void MyaRenderClay(Clay_RenderCommandArray Commands);
+void MyaUpdateFonts();

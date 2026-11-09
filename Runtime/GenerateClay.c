@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
+#include <wchar.h>
 
 static int MyaHexValue(char Character) {
   if (Character >= '0' && Character <= '9')
@@ -184,6 +185,25 @@ static float MyaUnitToPixels(MyaUnit Unit, MyaUnitContext Context,
   }
 }
 
+int MyaFindFont(const char *FontFamily, int FontSize) {
+  for (int Idx = 0; Idx < FontCount; Idx++) {
+    if (strcmp(Fonts[Idx].FontName, FontFamily) == 0 &&
+        Fonts[Idx].FontSize == FontSize) {
+      return Idx;
+    }
+  }
+
+  MyaFontEntry *NewFonts =
+      realloc(Fonts, sizeof(MyaFontEntry) * (FontCount + 1));
+  if (!NewFonts) {
+    return -1;
+  }
+  Fonts = NewFonts;
+  Fonts[FontCount] = (MyaFontEntry){
+      .FontName = FontFamily, .FontSize = FontSize, .Font = NULL, .Next = NULL};
+  return FontCount++;
+}
+
 void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
   if (!Element) {
     return;
@@ -302,6 +322,8 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
 
   Context.FontSize = FontSize;
 
+  int FontId = MyaFindFont(FontFamily, FontSize);
+
   CLAY_AUTO_ID({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
                                       .height = CLAY_SIZING_FIT(0)},
                            .padding = {.left = PaddingLeft,
@@ -316,7 +338,8 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
                           .length = (int32_t)strlen(Element->Text),
                           .chars = Element->Text};
 
-      CLAY_TEXT(Text, {.fontSize = FontSize, .textColor = Color});
+      CLAY_TEXT(Text,
+                {.fontSize = FontSize, .textColor = Color, .fontId = FontId});
     }
 
     for (MyaElement *Child = Element->FirstChild; Child;

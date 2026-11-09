@@ -1,6 +1,7 @@
 #include "Mya.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
@@ -31,16 +32,21 @@ static void HandleClayError(Clay_ErrorData Error) {
           Error.errorText.chars);
 }
 
-int main(int argc, char **argv) {
-  (void)argc;
-  (void)argv;
+int main(int Argc, char **Argv) {
+  (void)Argc;
+  (void)Argv;
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
     return 1;
   }
 
-  if (!SDL_CreateWindowAndRenderer("Mya", 1000, 700, SDL_WINDOW_RESIZABLE,
+  if (!TTF_Init()) {
+    fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  if (!SDL_CreateWindowAndRenderer("Mya", 800, 600, SDL_WINDOW_RESIZABLE,
                                    &Window, &Renderer)) {
     fprintf(stderr, "SDL_CreateWindowAndRenderer: %s\n", SDL_GetError());
 
@@ -73,9 +79,8 @@ int main(int argc, char **argv) {
   Clay_Arena Arena =
       Clay_CreateArenaWithCapacityAndMemory(ClayMemorySize, ClayMemory);
 
-  int Width = 1000;
-  int Height = 700;
-
+  int Width = 800;
+  int Height = 600;
   Clay_Initialize(
       Arena, (Clay_Dimensions){.width = (float)Width, .height = (float)Height},
       (Clay_ErrorHandler){.errorHandlerFunction = HandleClayError});
@@ -121,11 +126,10 @@ int main(int argc, char **argv) {
 
     Clay_RenderCommandArray Commands = Clay_EndLayout(0);
 
+    MyaUpdateFonts();
     SDL_SetRenderDrawColor(Renderer, 255, 255, 255, 255);
     SDL_RenderClear(Renderer);
-
     MyaRenderClay(Commands);
-
     SDL_RenderPresent(Renderer);
   }
 

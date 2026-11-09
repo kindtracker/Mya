@@ -2,6 +2,25 @@
 
 #include "Clay.h"
 #include <SDL3/SDL.h>
+#include <stdio.h>
+
+MyaFontEntry *Fonts = NULL;
+int FontCount = 0;
+
+void MyaUpdateFonts() {
+  for (int Idx = 0; Idx < FontCount; Idx++) {
+    MyaFontEntry *FontEntry = &Fonts[Idx];
+
+    if (!FontEntry->Font) {
+      FontEntry->Font =
+          TTF_OpenFont(FontEntry->FontName, (float)FontEntry->FontSize);
+      if (!FontEntry->Font) {
+        fprintf(stderr, "Failed to load font '%s': %s\n", FontEntry->FontName,
+                SDL_GetError());
+      }
+    }
+  }
+}
 
 void MyaRenderClay(Clay_RenderCommandArray Commands) {
   for (int32_t i = 0; i < Commands.length; i++) {

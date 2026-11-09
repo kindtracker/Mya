@@ -85,7 +85,7 @@ end
 
 local ObjectFiles = {}
 for _, File in ipairs(CFiles) do
-  local ObjectFile = BuildFolder .. "/" .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
+  local ObjectFile = BuildFolder .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
 
   local Parent = ObjectFile:match("(.+)/[^/]+$")
   if Parent then
@@ -98,6 +98,12 @@ for _, File in ipairs(CFiles) do
 end
 
 Execute(
-  string.format('%s -lSDL3 -lm %s -o "%s" %s', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya", LDFlags)
+  string.format(
+    '%s -lSDL3 -lSDL3_ttf -lm %s -o "%s" %s',
+    Compiler,
+    table.concat(ObjectFiles, " "),
+    BuildFolder .. "/" .. "Mya",
+    LDFlags
+  )
 )
 print(BuildFolder .. "/Mya")
