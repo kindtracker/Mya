@@ -103,13 +103,20 @@ int main(int argc, char **argv) {
 
     Clay_BeginLayout();
 
+    MyaUnitContext RootContext = {.FontSize = 16.0f,
+                                  .RootFontSize = 16.0f,
+                                  .ViewportWidth = Width,
+                                  .ViewportHeight = Height,
+                                  .ReferenceWidth = Width,
+                                  .ReferenceHeight = Height};
+
     CLAY_AUTO_ID(
         {.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
                                .height = CLAY_SIZING_GROW(0)},
                     .padding = {.left = 0, .right = 0, .top = 0, .bottom = 0},
                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
          .backgroundColor = {255, 255, 255, 255}}) {
-      MyaGenerateClayLayout(Page);
+      MyaGenerateClayLayout(Page, &RootContext);
     }
 
     Clay_RenderCommandArray Commands = Clay_EndLayout(0);

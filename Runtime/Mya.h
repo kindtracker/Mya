@@ -33,5 +33,39 @@ MyaElement *MyaCreatePage();
 extern SDL_Window *Window;
 extern SDL_Renderer *Renderer;
 
-void MyaGenerateClayLayout(MyaElement *Element);
+typedef enum {
+  MYA_UNIT_NONE,
+  MYA_UNIT_PX,
+  MYA_UNIT_EM,
+  MYA_UNIT_REM,
+  MYA_UNIT_PERCENT,
+  MYA_UNIT_VW,
+  MYA_UNIT_VH,
+  MYA_UNIT_VMIN,
+  MYA_UNIT_VMAX,
+  MYA_UNIT_PT,
+  MYA_UNIT_PC,
+  MYA_UNIT_IN,
+  MYA_UNIT_CM,
+  MYA_UNIT_MM
+} MyaUnitType;
+
+typedef enum { MYA_REFERENCE_WIDTH, MYA_REFERENCE_HEIGHT } MyaReferenceType;
+
+typedef struct {
+  float Value;
+  MyaUnitType Type;
+  bool Valid;
+} MyaUnit;
+
+typedef struct {
+  float FontSize;
+  float RootFontSize;
+  float ViewportWidth;
+  float ViewportHeight;
+  float ReferenceWidth;
+  float ReferenceHeight;
+} MyaUnitContext;
+
+void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext);
 void MyaRenderClay(Clay_RenderCommandArray Commands);

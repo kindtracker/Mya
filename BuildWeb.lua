@@ -98,6 +98,6 @@ for _, File in ipairs(CFiles) do
 end
 
 Execute(
-  string.format('%s -lSDL3 %s -o "%s" %s', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya", LDFlags)
+  string.format('%s -lSDL3 -lm %s -o "%s" %s', Compiler, table.concat(ObjectFiles, " "), BuildFolder .. "/Mya", LDFlags)
 )
 print(BuildFolder .. "/Mya")
