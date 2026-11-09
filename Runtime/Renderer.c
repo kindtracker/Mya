@@ -48,10 +48,20 @@ void MyaRenderClay(Clay_RenderCommandArray Commands) {
 
       memcpy(Buffer, Text->stringContents.chars, Length);
       Buffer[Length] = '\0';
-      SDL_SetRenderDrawColor(Renderer, (Uint8)Text->textColor.r,
-                             (Uint8)Text->textColor.g, (Uint8)Text->textColor.b,
-                             (Uint8)Text->textColor.a);
-      SDL_RenderDebugText(Renderer, Box.x, Box.y, Buffer);
+
+      SDL_Color Color = {(Uint8)Text->textColor.r, (Uint8)Text->textColor.g,
+                         (Uint8)Text->textColor.b, (Uint8)Text->textColor.a};
+
+      TTF_Font *Font = Fonts[Text->fontId].Font;
+
+      SDL_Surface *Surface =
+          TTF_RenderText_Blended(Font, Buffer, Length, Color);
+      SDL_Texture *Texture = SDL_CreateTextureFromSurface(Renderer, Surface);
+      SDL_DestroySurface(Surface);
+
+      SDL_FRect DestinationRectangle = {Box.x, Box.y, Box.width, Box.height};
+      SDL_RenderTexture(Renderer, Texture, NULL, &DestinationRectangle);
+      SDL_DestroyTexture(Texture);
       break;
     }
 

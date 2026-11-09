@@ -6,6 +6,51 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+typedef struct {
+  const char *Family;
+  const char *Path;
+} MyaFontMapping;
+
+static const MyaFontMapping FontMappings[] = {
+    {"Arial", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Helvetica", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Verdana", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Tahoma", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Geneva", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Trebuchet MS", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Lucida Sans Unicode", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Comic Sans MS", "Assets/Fonts/DejaVuSans.ttf"},
+    {"sans-serif", "Assets/Fonts/DejaVuSans.ttf"},
+    {"Times New Roman", "Assets/Fonts/DejaVuSerif.ttf"},
+    {"Times", "Assets/Fonts/DejaVuSerif.ttf"},
+    {"Georgia", "Assets/Fonts/DejaVuSerif.ttf"},
+    {"Palatino Linotype", "Assets/Fonts/DejaVuSerif.ttf"},
+    {"serif", "Assets/Fonts/DejaVuSerif.ttf"},
+    {"Courier New", "Assets/Fonts/DejaVuSansMono.ttf"},
+    {"Courier", "Assets/Fonts/DejaVuSansMono.ttf"},
+    {"Lucida Console", "Assets/Fonts/DejaVuSansMono.ttf"},
+    {"Monaco", "Assets/Fonts/DejaVuSansMono.ttf"},
+    {"monospace", "Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf"},
+    {"Impact", "Assets/Fonts/DejaVuSans-Bold.ttf"},
+    {"Brush Script MT", "Assets/Fonts/Rubik-Italic%5Bwght%5D.ttf"},
+    {"cursive", "Assets/Fonts/Rubik-Italic%5Bwght%5D.ttf"},
+    {"fantasy", "Assets/Fonts/Rubik%5Bwght%5D.ttf"},
+};
+
+static const char *MyaGetFontPath(const char *FontFamily) {
+  if (!FontFamily) {
+    return NULL;
+  }
+
+  for (size_t i = 0; i < sizeof(FontMappings) / sizeof(FontMappings[0]); i++) {
+    if (strcasecmp(FontMappings[i].Family, FontFamily) == 0) {
+      return FontMappings[i].Path;
+    }
+  }
+
+  return NULL;
+}
+
 static int MyaHexValue(char Character) {
   if (Character >= '0' && Character <= '9')
     return Character - '0';
@@ -322,7 +367,8 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
 
   Context.FontSize = FontSize;
 
-  int FontId = MyaFindFont(FontFamily, FontSize);
+  const char *FontFamilyPath = MyaGetFontPath(FontFamily);
+  int FontId = MyaFindFont(FontFamilyPath, FontSize);
 
   CLAY_AUTO_ID({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
                                       .height = CLAY_SIZING_FIT(0)},
