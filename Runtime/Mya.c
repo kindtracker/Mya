@@ -18,36 +18,30 @@ static char *MyaStrdup(const char *String) {
   return Copy;
 }
 
-static void MyaSetEntry(MyaEntry *Entries, const char *Name,
-                        const char *Value) {
+static MyaEntry *MyaSetEntry(MyaEntry *Entries, const char *Name,
+                             const char *Value) {
   MyaEntry *Current = Entries;
 
   while (Current) {
     if (strcmp(Name, Current->Name) == 0) {
       char *Copy = MyaStrdup(Value);
       if (!Copy)
-        return;
+        return Entries;
 
       free(Current->Value);
       Current->Value = Copy;
-      return;
+      return Entries;
     }
 
-    if (!Current->Next) {
+    if (!Current->Next)
       break;
-    }
 
     Current = Current->Next;
   }
 
-  if (!Current) {
-    return;
-  }
-
   MyaEntry *NewEntry = malloc(sizeof(MyaEntry));
-  if (!NewEntry) {
-    return;
-  }
+  if (!NewEntry)
+    return Entries;
 
   NewEntry->Name = MyaStrdup(Name);
   NewEntry->Value = MyaStrdup(Value);
@@ -56,14 +50,38 @@ static void MyaSetEntry(MyaEntry *Entries, const char *Name,
     free(NewEntry->Name);
     free(NewEntry->Value);
     free(NewEntry);
-    return;
+    return Entries;
   }
 
   NewEntry->Next = NULL;
-  Current->Next = NewEntry;
+
+  if (Current)
+    Current->Next = NewEntry;
+  else
+    Entries = NewEntry;
+
+  return Entries;
 }
 
-#define MYA_STYLE(Name, Value) MyaSetEntry(Element->Styles, #Name, Value)
+const char *MyaGetStyle(MyaElement *Element, const char *Key) {
+  if (!Element || !Key)
+    return NULL;
+
+  MyaEntry *Current = Element->Styles;
+
+  while (Current) {
+    if (strcmp(Current->Name, Key) == 0) {
+      return Current->Value;
+    }
+
+    Current = Current->Next;
+  }
+
+  return NULL;
+}
+
+#define MYA_STYLE(Name, Value)                                                 \
+  Element->Styles = MyaSetEntry(Element->Styles, #Name, Value)
 MyaElement *MyaCreate(const char *TagName) {
   MyaElement *Element = calloc(1, sizeof(MyaElement));
   if (!Element) {
@@ -190,7 +208,10 @@ int MyaAppendChild(MyaElement *Parent, MyaElement *Child) {
 }
 
 void MyaSetAttribute(MyaElement *Element, const char *Key, const char *Value) {
-  MyaSetEntry(Element->Attributes, Key, Value);
+  if (!Element)
+    return;
+
+  Element->Attributes = MyaSetEntry(Element->Attributes, Key, Value);
 }
 
 void MyaSetText(MyaElement *Element, const char *Text) {

@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
                                .height = CLAY_SIZING_GROW(0)},
                     .padding = {.left = 0, .right = 0, .top = 0, .bottom = 0},
                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
-         .backgroundColor = {25, 25, 30, 255}}) {
+         .backgroundColor = {255, 255, 255, 255}}) {
       MyaGenerateClayLayout(Page);
     }
 

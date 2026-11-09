@@ -21,10 +21,11 @@ typedef struct MyaElement {
 } MyaElement;
 
 MyaElement *MyaCreate(const char *TagName);
+void MyaDestroy(MyaElement *Element);
 int MyaAppendChild(MyaElement *Parent, MyaElement *Child);
 void MyaSetAttribute(MyaElement *Element, const char *Key, const char *Value);
 void MyaSetText(MyaElement *Element, const char *Text);
-void MyaDestroy(MyaElement *Element);
+const char *MyaGetStyle(MyaElement *Element, const char *Key);
 
 MyaElement *MyaCreatePage();
 
