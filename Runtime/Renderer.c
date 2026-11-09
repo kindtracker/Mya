@@ -57,11 +57,11 @@ void MyaRenderClay(Clay_RenderCommandArray Commands) {
       SDL_Surface *Surface =
           TTF_RenderText_Blended(Font, Buffer, Length, Color);
       SDL_Texture *Texture = SDL_CreateTextureFromSurface(Renderer, Surface);
-      SDL_DestroySurface(Surface);
 
-      SDL_FRect DestinationRectangle = {Box.x, Box.y, Box.width, Box.height};
+      SDL_FRect DestinationRectangle = {Box.x, Box.y, Surface->w, Surface->h};
       SDL_RenderTexture(Renderer, Texture, NULL, &DestinationRectangle);
       SDL_DestroyTexture(Texture);
+      SDL_DestroySurface(Surface);
       break;
     }
 
