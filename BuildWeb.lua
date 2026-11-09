@@ -85,7 +85,7 @@ end
 
 local ObjectFiles = {}
 for _, File in ipairs(CFiles) do
-  local ObjectFile = BuildFolder .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
+  local ObjectFile = BuildFolder .. "/" .. File:sub(#OutputFolder + 2):gsub("%.c$", ".o")
 
   local Parent = ObjectFile:match("(.+)/[^/]+$")
   if Parent then
