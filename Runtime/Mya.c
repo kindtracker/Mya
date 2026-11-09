@@ -82,7 +82,12 @@ const char *MyaGetStyle(MyaElement *Element, const char *Key) {
 
 #define MYA_STYLE(Name, Value)                                                 \
   Element->Styles = MyaSetEntry(Element->Styles, #Name, Value)
+
 MyaElement *MyaCreate(const char *TagName) {
+  if (!TagName) {
+    return NULL;
+  }
+
   MyaElement *Element = calloc(1, sizeof(MyaElement));
   if (!Element) {
     return NULL;
@@ -95,7 +100,7 @@ MyaElement *MyaCreate(const char *TagName) {
   }
 
   MYA_STYLE(FontFamily, "sans-serif");
-  MYA_STYLE(FontSize, "16");
+  MYA_STYLE(FontSize, "16px");
   MYA_STYLE(FontWeight, "400");
   MYA_STYLE(FontStyle, "normal");
   MYA_STYLE(LineHeight, "normal");
@@ -108,6 +113,7 @@ MyaElement *MyaCreate(const char *TagName) {
   MYA_STYLE(WhiteSpace, "normal");
   MYA_STYLE(WordBreak, "normal");
   MYA_STYLE(OverflowWrap, "normal");
+  MYA_STYLE(VerticalAlign, "baseline");
   MYA_STYLE(Color, "#000000");
   MYA_STYLE(BackgroundColor, "transparent");
   MYA_STYLE(Display, "block");
@@ -149,46 +155,51 @@ MyaElement *MyaCreate(const char *TagName) {
   MYA_STYLE(Visibility, "visible");
   MYA_STYLE(ZIndex, "auto");
   MYA_STYLE(Cursor, "auto");
+  MYA_STYLE(ListStyleType, "disc");
 
   if (strcmp(TagName, "h1") == 0) {
-    MYA_STYLE(FontSize, "32");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "21.44");
-    MYA_STYLE(MarginBottom, "21.44");
+    MYA_STYLE(FontSize, "2em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "0.67em");
+    MYA_STYLE(MarginBlockEnd, "0.67em");
   } else if (strcmp(TagName, "h2") == 0) {
-    MYA_STYLE(FontSize, "24");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "19.92");
-    MYA_STYLE(MarginBottom, "19.92");
+    MYA_STYLE(FontSize, "1.5em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "0.83em");
+    MYA_STYLE(MarginBlockEnd, "0.83em");
   } else if (strcmp(TagName, "h3") == 0) {
-    MYA_STYLE(FontSize, "18.72");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "18.72");
-    MYA_STYLE(MarginBottom, "18.72");
+    MYA_STYLE(FontSize, "1.17em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
   } else if (strcmp(TagName, "h4") == 0) {
-    MYA_STYLE(FontSize, "16");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "21.28");
-    MYA_STYLE(MarginBottom, "21.28");
+    MYA_STYLE(FontSize, "1em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "1.33em");
+    MYA_STYLE(MarginBlockEnd, "1.33em");
   } else if (strcmp(TagName, "h5") == 0) {
-    MYA_STYLE(FontSize, "13.28");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "22.18");
-    MYA_STYLE(MarginBottom, "22.18");
+    MYA_STYLE(FontSize, "0.83em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "1.67em");
+    MYA_STYLE(MarginBlockEnd, "1.67em");
   } else if (strcmp(TagName, "h6") == 0) {
-    MYA_STYLE(FontSize, "10.72");
-    MYA_STYLE(FontWeight, "700");
-    MYA_STYLE(MarginTop, "24.14");
-    MYA_STYLE(MarginBottom, "24.14");
-  } else if (strcmp(TagName, "p") == 0) {
-    MYA_STYLE(MarginTop, "16");
-    MYA_STYLE(MarginBottom, "16");
-  } else if (strcmp(TagName, "small") == 0) {
-    MYA_STYLE(FontSize, "13.33");
+    MYA_STYLE(FontSize, "0.67em");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(MarginBlockStart, "2.33em");
+    MYA_STYLE(MarginBlockEnd, "2.33em");
+  }
+
+  if (strcmp(TagName, "p") == 0) {
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
+  }
+
+  if (strcmp(TagName, "small") == 0) {
+    MYA_STYLE(FontSize, "smaller");
   } else if (strcmp(TagName, "big") == 0) {
-    MYA_STYLE(FontSize, "19.2");
+    MYA_STYLE(FontSize, "larger");
   } else if (strcmp(TagName, "strong") == 0 || strcmp(TagName, "b") == 0) {
-    MYA_STYLE(FontWeight, "700");
+    MYA_STYLE(FontWeight, "bold");
   } else if (strcmp(TagName, "em") == 0 || strcmp(TagName, "i") == 0 ||
              strcmp(TagName, "cite") == 0 || strcmp(TagName, "dfn") == 0 ||
              strcmp(TagName, "var") == 0) {
@@ -199,43 +210,73 @@ MyaElement *MyaCreate(const char *TagName) {
              strcmp(TagName, "strike") == 0) {
     MYA_STYLE(TextDecoration, "line-through");
   } else if (strcmp(TagName, "mark") == 0) {
-    MYA_STYLE(BackgroundColor, "#ffff00");
+    MYA_STYLE(BackgroundColor, "yellow");
   } else if (strcmp(TagName, "sub") == 0) {
-    MYA_STYLE(FontSize, "13.33");
+    MYA_STYLE(FontSize, "smaller");
+    MYA_STYLE(VerticalAlign, "sub");
   } else if (strcmp(TagName, "sup") == 0) {
-    MYA_STYLE(FontSize, "13.33");
-  } else if (strcmp(TagName, "pre") == 0) {
+    MYA_STYLE(FontSize, "smaller");
+    MYA_STYLE(VerticalAlign, "super");
+  }
+
+  if (strcmp(TagName, "pre") == 0) {
     MYA_STYLE(FontFamily, "monospace");
     MYA_STYLE(WhiteSpace, "pre");
-    MYA_STYLE(MarginTop, "13.33");
-    MYA_STYLE(MarginBottom, "13.33");
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
   } else if (strcmp(TagName, "code") == 0 || strcmp(TagName, "kbd") == 0 ||
              strcmp(TagName, "samp") == 0) {
     MYA_STYLE(FontFamily, "monospace");
-    MYA_STYLE(FontSize, "13.33");
-  } else if (strcmp(TagName, "blockquote") == 0) {
-    MYA_STYLE(MarginLeft, "40");
-    MYA_STYLE(MarginRight, "40");
-    MYA_STYLE(MarginTop, "16");
-    MYA_STYLE(MarginBottom, "16");
-  } else if (strcmp(TagName, "ul") == 0 || strcmp(TagName, "ol") == 0) {
-    MYA_STYLE(PaddingLeft, "40");
-    MYA_STYLE(MarginTop, "16");
-    MYA_STYLE(MarginBottom, "16");
+  }
+
+  if (strcmp(TagName, "blockquote") == 0) {
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
+    MYA_STYLE(MarginInlineStart, "40px");
+    MYA_STYLE(MarginInlineEnd, "40px");
+  } else if (strcmp(TagName, "body") == 0) {
+    MYA_STYLE(MarginTop, "8px");
+    MYA_STYLE(MarginRight, "8px");
+    MYA_STYLE(MarginBottom, "8px");
+    MYA_STYLE(MarginLeft, "8px");
+  }
+
+  if (strcmp(TagName, "ul") == 0 || strcmp(TagName, "menu") == 0) {
+    MYA_STYLE(PaddingInlineStart, "40px");
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
+    MYA_STYLE(ListStyleType, "disc");
+  } else if (strcmp(TagName, "ol") == 0) {
+    MYA_STYLE(PaddingInlineStart, "40px");
+    MYA_STYLE(MarginBlockStart, "1em");
+    MYA_STYLE(MarginBlockEnd, "1em");
+    MYA_STYLE(ListStyleType, "decimal");
   } else if (strcmp(TagName, "li") == 0) {
     MYA_STYLE(Display, "list-item");
-  } else if (strcmp(TagName, "hr") == 0) {
-    MYA_STYLE(BorderWidth, "1");
+  }
+
+  if (strcmp(TagName, "hr") == 0) {
+    MYA_STYLE(BorderWidth, "1px");
     MYA_STYLE(BorderStyle, "inset");
-    MYA_STYLE(MarginTop, "8");
-    MYA_STYLE(MarginBottom, "8");
-  } else if (strcmp(TagName, "img") == 0) {
-    MYA_STYLE(Display, "inline");
-  } else if (strcmp(TagName, "span") == 0 || strcmp(TagName, "a") == 0 ||
-             strcmp(TagName, "strong") == 0 || strcmp(TagName, "b") == 0 ||
-             strcmp(TagName, "em") == 0 || strcmp(TagName, "i") == 0 ||
-             strcmp(TagName, "small") == 0 || strcmp(TagName, "code") == 0 ||
-             strcmp(TagName, "label") == 0) {
+    MYA_STYLE(BorderColor, "gray");
+    MYA_STYLE(MarginBlockStart, "0.5em");
+    MYA_STYLE(MarginBlockEnd, "0.5em");
+  }
+
+  if (strcmp(TagName, "span") == 0 || strcmp(TagName, "a") == 0 ||
+      strcmp(TagName, "strong") == 0 || strcmp(TagName, "b") == 0 ||
+      strcmp(TagName, "em") == 0 || strcmp(TagName, "i") == 0 ||
+      strcmp(TagName, "small") == 0 || strcmp(TagName, "big") == 0 ||
+      strcmp(TagName, "code") == 0 || strcmp(TagName, "kbd") == 0 ||
+      strcmp(TagName, "samp") == 0 || strcmp(TagName, "sub") == 0 ||
+      strcmp(TagName, "sup") == 0 || strcmp(TagName, "u") == 0 ||
+      strcmp(TagName, "s") == 0 || strcmp(TagName, "del") == 0 ||
+      strcmp(TagName, "ins") == 0 || strcmp(TagName, "mark") == 0 ||
+      strcmp(TagName, "cite") == 0 || strcmp(TagName, "dfn") == 0 ||
+      strcmp(TagName, "var") == 0 || strcmp(TagName, "abbr") == 0 ||
+      strcmp(TagName, "q") == 0 || strcmp(TagName, "time") == 0 ||
+      strcmp(TagName, "label") == 0 || strcmp(TagName, "bdi") == 0 ||
+      strcmp(TagName, "bdo") == 0 || strcmp(TagName, "img") == 0) {
     MYA_STYLE(Display, "inline");
   }
 
@@ -245,8 +286,42 @@ MyaElement *MyaCreate(const char *TagName) {
     MYA_STYLE(Cursor, "pointer");
   }
 
+  if (strcmp(TagName, "table") == 0) {
+    MYA_STYLE(Display, "table");
+    MYA_STYLE(BorderSpacing, "2px");
+  } else if (strcmp(TagName, "thead") == 0) {
+    MYA_STYLE(Display, "table-header-group");
+  } else if (strcmp(TagName, "tbody") == 0) {
+    MYA_STYLE(Display, "table-row-group");
+  } else if (strcmp(TagName, "tfoot") == 0) {
+    MYA_STYLE(Display, "table-footer-group");
+  } else if (strcmp(TagName, "tr") == 0) {
+    MYA_STYLE(Display, "table-row");
+  } else if (strcmp(TagName, "td") == 0) {
+    MYA_STYLE(Display, "table-cell");
+  } else if (strcmp(TagName, "th") == 0) {
+    MYA_STYLE(Display, "table-cell");
+    MYA_STYLE(FontWeight, "bold");
+    MYA_STYLE(TextAlign, "center");
+  } else if (strcmp(TagName, "caption") == 0) {
+    MYA_STYLE(Display, "table-caption");
+    MYA_STYLE(TextAlign, "center");
+  } else if (strcmp(TagName, "col") == 0) {
+    MYA_STYLE(Display, "table-column");
+  } else if (strcmp(TagName, "colgroup") == 0) {
+    MYA_STYLE(Display, "table-column-group");
+  }
+
+  if (strcmp(TagName, "head") == 0 || strcmp(TagName, "title") == 0 ||
+      strcmp(TagName, "meta") == 0 || strcmp(TagName, "link") == 0 ||
+      strcmp(TagName, "style") == 0 || strcmp(TagName, "script") == 0 ||
+      strcmp(TagName, "template") == 0) {
+    MYA_STYLE(Display, "none");
+  }
+
   return Element;
 }
+
 #undef MYA_STYLE
 
 static void MyaDetach(MyaElement *Element) {

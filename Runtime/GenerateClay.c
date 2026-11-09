@@ -370,27 +370,62 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
   const char *FontFamilyPath = MyaGetFontPath(FontFamily);
   int FontId = MyaFindFont(FontFamilyPath, FontSize);
 
-  CLAY_AUTO_ID({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0),
-                                      .height = CLAY_SIZING_FIT(0)},
-                           .padding = {.left = PaddingLeft,
-                                       .right = PaddingRight,
-                                       .top = PaddingTop,
-                                       .bottom = PaddingBottom},
-                           .childGap = 4,
-                           .layoutDirection = CLAY_TOP_TO_BOTTOM},
-                .backgroundColor = BackgroundColor}) {
-    if (Element->Text && Element->Text[0] != '\0') {
-      Clay_String Text = {.isStaticallyAllocated = false,
-                          .length = (int32_t)strlen(Element->Text),
-                          .chars = Element->Text};
+  CLAY_AUTO_ID({
+      .layout =
+          {
+              .sizing =
+                  {
+                      .width = CLAY_SIZING_GROW(0),
+                      .height = CLAY_SIZING_FIT(0),
+                  },
+              .padding =
+                  {
+                      .left = MarginLeft,
+                      .right = MarginRight,
+                      .top = MarginTop,
+                      .bottom = MarginBottom,
+                  },
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          },
+  }) {
+    CLAY_AUTO_ID({
+        .layout =
+            {
+                .sizing =
+                    {
+                        .width = CLAY_SIZING_GROW(0),
+                        .height = CLAY_SIZING_FIT(0),
+                    },
+                .padding =
+                    {
+                        .left = PaddingLeft,
+                        .right = PaddingRight,
+                        .top = PaddingTop,
+                        .bottom = PaddingBottom,
+                    },
+                .childGap = 4,
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            },
+        .backgroundColor = BackgroundColor,
+    }) {
+      if (Element->Text && Element->Text[0] != '\0') {
+        Clay_String Text = {
+            .isStaticallyAllocated = false,
+            .length = (int32_t)strlen(Element->Text),
+            .chars = Element->Text,
+        };
 
-      CLAY_TEXT(Text,
-                {.fontSize = FontSize, .textColor = Color, .fontId = FontId});
-    }
+        CLAY_TEXT(Text, {
+                            .fontSize = FontSize,
+                            .textColor = Color,
+                            .fontId = FontId,
+                        });
+      }
 
-    for (MyaElement *Child = Element->FirstChild; Child;
-         Child = Child->NextSibling) {
-      MyaGenerateClayLayout(Child, &Context);
+      for (MyaElement *Child = Element->FirstChild; Child;
+           Child = Child->NextSibling) {
+        MyaGenerateClayLayout(Child, &Context);
+      }
     }
   }
 }
