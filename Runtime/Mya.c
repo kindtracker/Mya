@@ -64,17 +64,21 @@ static MyaEntry *MyaSetEntry(MyaEntry *Entries, const char *Name,
 }
 
 const char *MyaGetStyle(MyaElement *Element, const char *Key) {
-  if (!Element || !Key)
+  if (!Element || !Key) {
     return NULL;
+  }
 
-  MyaEntry *Current = Element->Styles;
+  MyaEntry *CurrentStyle = Element->Styles;
 
-  while (Current) {
-    if (strcmp(Current->Name, Key) == 0) {
-      return Current->Value;
+  while (Element) {
+    while (CurrentStyle) {
+      if (strcmp(CurrentStyle->Name, Key) == 0) {
+        return CurrentStyle->Value;
+      }
+
+      CurrentStyle = CurrentStyle->Next;
     }
-
-    Current = Current->Next;
+    Element = Element->Parent;
   }
 
   return NULL;
@@ -382,6 +386,13 @@ void MyaSetAttribute(MyaElement *Element, const char *Key, const char *Value) {
     return;
 
   Element->Attributes = MyaSetEntry(Element->Attributes, Key, Value);
+}
+
+void MyaSetStyle(MyaElement *Element, const char *Key, const char *Value) {
+  if (!Element)
+    return;
+
+  Element->Styles = MyaSetEntry(Element->Styles, Key, Value);
 }
 
 void MyaSetText(MyaElement *Element, const char *Text) {

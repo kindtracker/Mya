@@ -931,8 +931,6 @@ function Mya:Compile(State, FileName, OutputFile)
     return nil, State.ErrorMessage
   end
 
-  PrintTable(State.Ast)
-
   State.Backend:Compile(State)
 
   if OutputFile then

@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CLAY_IMPLEMENTATION
 #include "Clay.h"
 
 extern MyaElement *MyaCreatePage(void);
@@ -63,6 +62,7 @@ int main(int Argc, char **Argv) {
     SDL_Quit();
     return 1;
   }
+  MyaApplyStyles(Page);
 
   uint32_t ClayMemorySize = Clay_MinMemorySize();
   void *ClayMemory = malloc(ClayMemorySize);

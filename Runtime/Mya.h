@@ -25,6 +25,7 @@ MyaElement *MyaCreate(const char *TagName);
 void MyaDestroy(MyaElement *Element);
 int MyaAppendChild(MyaElement *Parent, MyaElement *Child);
 void MyaSetAttribute(MyaElement *Element, const char *Key, const char *Value);
+void MyaSetStyle(MyaElement *Element, const char *Key, const char *Value);
 void MyaSetText(MyaElement *Element, const char *Text);
 const char *MyaGetStyle(MyaElement *Element, const char *Key);
 
@@ -65,6 +66,23 @@ typedef struct {
   float ReferenceHeight;
 } MyaUnitContext;
 
+typedef struct MyaStyleDeclaration {
+  char *Property;
+  char *Value;
+  bool Important;
+  struct MyaStyleDeclaration *Next;
+} MyaStyleDeclaration;
+
+typedef struct MyaStyleRule {
+  char *Selector;
+  MyaStyleDeclaration *Declarations;
+  struct MyaStyleRule *Next;
+} MyaStyleRule;
+
+typedef struct MyaStyleSheet {
+  MyaStyleRule *Rules;
+} MyaStyleSheet;
+
 typedef struct MyaFontEntry {
   const char *FontName;
   int FontSize;
@@ -80,3 +98,6 @@ extern int FontCount;
 void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext);
 void MyaRenderClay(Clay_RenderCommandArray Commands);
 void MyaUpdateFonts();
+MyaStyleSheet *MyaStyleParse(const char *CSS);
+void MyaStyleSheetDestroy(MyaStyleSheet *Sheet);
+bool MyaApplyStyles(MyaElement *Page);

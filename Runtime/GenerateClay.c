@@ -3,6 +3,7 @@
 #include "Clay.h"
 #include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <wchar.h>
 
@@ -305,6 +306,7 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
       MyaParseColor(MyaGetStyle(Element, "BackgroundColor"));
 
   const char *Display = MyaGetStyle(Element, "Display");
+  bool DisplayNone = strcmp(Display, "none") == 0;
   const char *Position = MyaGetStyle(Element, "Position");
 
   const char *Width = MyaGetStyle(Element, "Width");
@@ -408,7 +410,7 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
             },
         .backgroundColor = BackgroundColor,
     }) {
-      if (Element->Text && Element->Text[0] != '\0') {
+      if (Element->Text && Element->Text[0] != '\0' && DisplayNone == false) {
         Clay_String Text = {
             .isStaticallyAllocated = false,
             .length = (int32_t)strlen(Element->Text),

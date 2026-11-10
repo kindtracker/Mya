@@ -3,8 +3,9 @@ local lfs = require("lfs")
 local SourceFolders = { "Web/Html" }
 
 local Compiler = "gcc"
-local CFlags = "-O2 -flto=auto"
-local LDFlags = "-O2 -flto=auto"
+local Linker = "gcc"
+local CFlags = "-O2"
+local LDFlags = "-O2"
 
 local OutputFolder = "Output"
 local BuildFolder = "Build"
@@ -92,7 +93,11 @@ for _, File in ipairs(CFiles) do
     MakeDirectory(Parent)
   end
 
-  Execute(string.format('%s -c "%s" -o "%s" -IRuntime %s', Compiler, File, ObjectFile, CFlags))
+  if File == "Runtime/Clay.c" then
+    Execute(string.format('%s -c "%s" -o "%s" -IRuntime -O0', Compiler, File, ObjectFile))
+  else
+    Execute(string.format('%s -c "%s" -o "%s" -IRuntime %s', Compiler, File, ObjectFile, CFlags))
+  end
 
   table.insert(ObjectFiles, ObjectFile)
 end
@@ -100,7 +105,7 @@ end
 Execute(
   string.format(
     '%s -lSDL3 -lSDL3_ttf -lm %s -o "%s" %s',
-    Compiler,
+    Linker,
     table.concat(ObjectFiles, " "),
     BuildFolder .. "/" .. "Mya",
     LDFlags
