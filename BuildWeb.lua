@@ -2,10 +2,10 @@ local lfs = require("lfs")
 
 local SourceFolders = { "Web/Html" }
 
-local Compiler = "gcc"
-local Linker = "gcc"
-local CFlags = "-O2"
-local LDFlags = "-O2"
+local Compiler = "clang"
+local Linker = "clang"
+local CFlags = "-O0"
+local LDFlags = "-O0"
 
 local OutputFolder = "Output"
 local BuildFolder = "Build"
@@ -34,7 +34,7 @@ local function ListAllFiles(Directory, Extension)
 end
 
 local function Execute(Command)
-  print("> " .. Command)
+  print(Command)
 
   local Success, Type, Code = os.execute(Command)
 
@@ -111,4 +111,3 @@ Execute(
     LDFlags
   )
 )
-print(BuildFolder .. "/Mya")

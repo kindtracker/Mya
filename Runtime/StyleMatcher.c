@@ -1,4 +1,28 @@
+#include <ctype.h>
+#include <stdio.h>
+
 #include "Mya.h"
+
+static void MyaStylePropertyToName(const char *Property, char *Name) {
+  if (!Property || !Name) {
+    return;
+  }
+
+  bool Uppercase = true;
+
+  while (*Property) {
+    if (*Property == '-') {
+      Uppercase = true;
+    } else {
+      *Name++ = Uppercase ? (char)toupper((unsigned char)*Property) : *Property;
+      Uppercase = false;
+    }
+
+    Property++;
+  }
+
+  *Name = '\0';
+}
 
 static void MyaAppendStyleSheet(MyaStyleSheet *Destination,
                                 MyaStyleSheet *Source) {
@@ -29,13 +53,8 @@ static bool MyaCollectStyles(MyaElement *Element, MyaStyleSheet *StyleSheet) {
   }
 
   if (strcmp(Element->TagName, "style") == 0) {
-    for (MyaElement *Child = Element->FirstChild; Child;
-         Child = Child->NextSibling) {
-      if (!Child->Text) {
-        continue;
-      }
-
-      MyaStyleSheet *Parsed = MyaStyleParse(Child->Text);
+    if (Element->Text) {
+      MyaStyleSheet *Parsed = MyaStyleParse(Element->Text);
 
       if (!Parsed) {
         return false;
@@ -85,7 +104,10 @@ static void MyaApplyStylesToElement(MyaElement *Element,
 
     for (MyaStyleDeclaration *Declaration = Rule->Declarations; Declaration;
          Declaration = Declaration->Next) {
-      MyaSetStyle(Element, Declaration->Property, Declaration->Value);
+      size_t Length = strlen(Declaration->Property);
+      char StyleName[Length + 1];
+      MyaStylePropertyToName(Declaration->Property, StyleName);
+      MyaSetStyle(Element, StyleName, Declaration->Value);
     }
   }
 

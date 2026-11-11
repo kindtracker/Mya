@@ -1,6 +1,6 @@
-local CBackend = {}
+local CGenerator = {}
 
-function CBackend:PutFormatted(State, Format, ...)
+function CGenerator:PutFormatted(State, Format, ...)
   local Output = string.format(Format, ...)
 
   Output = Output:gsub("\n([^\n])", "\n" .. "%1")
@@ -8,7 +8,7 @@ function CBackend:PutFormatted(State, Format, ...)
   self.CCode = self.CCode .. Output
 end
 
-function CBackend:Generate(State, Ast, Parent)
+function CGenerator:Generate(State, Ast, Parent)
   if Ast.Kind == "Element" then
     self:PutFormatted(State, "  MyaElement *%s = MyaCreate(%q);\n", Ast.Id, Ast.TagName)
     if Parent then
@@ -30,7 +30,7 @@ function CBackend:Generate(State, Ast, Parent)
   end
 end
 
-function CBackend:Compile(State)
+function CGenerator:Compile(State)
   self.CCode = ""
 
   self:PutFormatted(
@@ -64,4 +64,4 @@ MyaElement *MyaCreatePage() {
   return self.CCode
 end
 
-return CBackend
+return CGenerator

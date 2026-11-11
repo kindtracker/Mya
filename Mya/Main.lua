@@ -1,5 +1,5 @@
 local Mya = require("Mya.Mya")
-local CBackend = require("Mya.Backends.CBackend")
+local CBackend = require("Mya.CGenerator")
 
 math.randomseed(os.time())
 

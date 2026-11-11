@@ -12,6 +12,20 @@ typedef struct {
   const char *Path;
 } MyaFontMapping;
 
+typedef enum {
+  MYA_SIZE_AUTO,
+  MYA_SIZE_FIXED,
+  MYA_SIZE_GROW,
+  MYA_SIZE_FIT,
+  MYA_SIZE_NONE,
+  MYA_SIZE_INVALID
+} MyaSizeType;
+
+typedef struct {
+  MyaSizeType Type;
+  MyaUnit Unit;
+} MyaSize;
+
 static const MyaFontMapping FontMappings[] = {
     {"Arial", "Assets/Fonts/DejaVuSans.ttf"},
     {"Helvetica", "Assets/Fonts/DejaVuSans.ttf"},
@@ -231,6 +245,55 @@ static float MyaUnitToPixels(MyaUnit Unit, MyaUnitContext Context,
   }
 }
 
+static MyaSize MyaParseSize(const char *Value) {
+  if (!Value) {
+    return (MyaSize){.Type = MYA_SIZE_INVALID};
+  }
+
+  if (strcasecmp(Value, "auto") == 0) {
+    return (MyaSize){.Type = MYA_SIZE_AUTO};
+  }
+
+  if (strcasecmp(Value, "none") == 0) {
+    return (MyaSize){.Type = MYA_SIZE_NONE};
+  }
+
+  if (strcasecmp(Value, "fit-content") == 0) {
+    return (MyaSize){.Type = MYA_SIZE_FIT};
+  }
+
+  if (strcasecmp(Value, "max-content") == 0) {
+    return (MyaSize){.Type = MYA_SIZE_FIT};
+  }
+
+  MyaUnit Unit = MyaParseUnit(Value);
+
+  if (!Unit.Valid) {
+    return (MyaSize){.Type = MYA_SIZE_INVALID};
+  }
+
+  return (MyaSize){
+      .Type = MYA_SIZE_FIXED,
+      .Unit = Unit,
+  };
+}
+
+static Clay_SizingAxis MyaConvertSize(MyaSize Size, MyaUnitContext Context,
+                                      MyaReferenceType Reference) {
+  switch (Size.Type) {
+  case MYA_SIZE_AUTO:
+    return CLAY_SIZING_GROW(0);
+  case MYA_SIZE_FIXED:
+    return CLAY_SIZING_FIXED(MyaUnitToPixels(Size.Unit, Context, Reference));
+  case MYA_SIZE_GROW:
+    return CLAY_SIZING_GROW(0);
+  case MYA_SIZE_FIT:
+    return CLAY_SIZING_FIT(0);
+  default:
+    return CLAY_SIZING_FIT(0);
+  }
+}
+
 int MyaFindFont(const char *FontFamily, int FontSize) {
   for (int Idx = 0; Idx < FontCount; Idx++) {
     if (strcmp(Fonts[Idx].FontName, FontFamily) == 0 &&
@@ -395,8 +458,11 @@ void MyaGenerateClayLayout(MyaElement *Element, MyaUnitContext *ParentContext) {
             {
                 .sizing =
                     {
-                        .width = CLAY_SIZING_GROW(0),
-                        .height = CLAY_SIZING_FIT(0),
+                        .width = MyaConvertSize(MyaParseSize(Width), Context,
+                                                MYA_REFERENCE_WIDTH),
+
+                        .height = MyaConvertSize(MyaParseSize(Height), Context,
+                                                 MYA_REFERENCE_HEIGHT),
                     },
                 .padding =
                     {

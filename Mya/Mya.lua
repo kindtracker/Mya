@@ -808,7 +808,7 @@ function Parser:ParseText(State)
 
   local Parent = self:Current()
 
-  if not (Parent.Name and RawTextElements[Parent.Name]) then
+  if not (Parent.TagName and RawTextElements[Parent.TagName]) then
     Value = DecodeEntities(Value)
   end
 

@@ -31,7 +31,6 @@ const char *MyaGetStyle(MyaElement *Element, const char *Key);
 
 MyaElement *MyaCreatePage();
 
-// Internal
 typedef enum {
   MYA_UNIT_NONE,
   MYA_UNIT_PX,
